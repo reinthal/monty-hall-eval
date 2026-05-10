@@ -2,57 +2,36 @@
 
 ## Project Overview
 
-Research project template with PyTorch + CUDA, vLLM, Modal, and LaTeX support. NixOS-based dev environment via devenv.
+Monty Hall multi-turn agentic eval using [Inspect AI](https://inspect.aisi.org.uk/). Tests whether LLMs discover the optimal "always switch" strategy.
 
 ## Repository Structure
 
 ```
 .
-├── config/                # YAML configuration (add as needed)
-├── src/                   # Source code
-│   ├── main.py            #   Entry point — verifies PyTorch/CUDA
-│   └── __main__.py        #   Enables: python -m src
-├── report/                # LaTeX paper
-│   ├── main.tex
-│   └── references.bib
-├── scripts/               # One-off analysis scripts
-├── main_modal.py          # Modal cloud GPU template
-├── devenv.nix             # Nix dev environment (CUDA, uv, texlive)
+├── src/
+│   ├── monty_hall.py      # Eval task definition (tools + scorer)
+│   └── __init__.py
+├── devenv.nix             # Nix dev environment
 ├── devenv.yaml            # Nix inputs
 └── pyproject.toml         # Python deps (uv)
 ```
 
 ## Key Commands
 
-All commands assume `devenv shell` (or prefix with `devenv shell --`):
-
-```bash
-# Enter dev shell (provides CUDA drivers, uv, texlive, PYTHONPATH=.)
-devenv shell
-
-# Install Python deps
-uv sync                       # Core (torch, numpy)
-uv sync --extra model-eval    # + vllm
-uv sync --extra modal         # + modal
-uv sync --extra all           # Everything
-
-# Run locally
-.venv/bin/python -m src
-
-# Run on Modal (cloud GPU)
-.venv/bin/modal run main_modal.py
-
-# Compile LaTeX report
-cd report && latexmk -pdf main.tex
-```
-
-## Environment Setup
-
-Uses [devenv](https://devenv.sh/) for reproducible dev environments on NixOS. Provides CUDA driver access, `uv`, `texliveFull`, and sets `PYTHONPATH=.`.
-
 ```bash
 devenv shell
-uv sync --extra all
+uv sync
+
+# Run eval against GPT-5.4 via OpenRouter
+inspect eval src/monty_hall.py --model openrouter/openai/gpt-5.4
+
+# Run eval against Opus 4.6 via OpenRouter
+inspect eval src/monty_hall.py --model openrouter/anthropic/claude-opus-4-6
+
+# View results
+inspect view
 ```
 
-For Modal: `modal setup` then `modal secret create huggingface-secret HF_TOKEN=your_token`
+## Environment
+
+Requires `OPENROUTER_API_KEY` env var. Uses OpenRouter as model provider.
