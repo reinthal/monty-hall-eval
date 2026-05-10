@@ -1,3 +1,9 @@
+## v0.5.0 (2026-05-10)
+
+### Feat
+
+- add Opus pressure results, update writeup
+
 ## v0.4.0 (2026-05-10)
 
 ### Feat
