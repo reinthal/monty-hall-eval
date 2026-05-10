@@ -191,7 +191,7 @@ def standard_monty(
                 payout_table=payout_table,
             )),
             setup_game_state(),
-            use_tools(check_status(), make_decision(), tool_choice="any"),
+            use_tools(check_status(), make_decision(), tool_choice="auto"),
             generate(tool_calls="loop"),
         ],
         scorer=standard_scorer(),
