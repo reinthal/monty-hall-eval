@@ -1,0 +1,62 @@
+[project]
+name = "my-project"
+version = "0.2.1"
+description = "A research project template with PyTorch, CUDA, vLLM, and Modal support"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.4.1",
+    "torch>=2.10.0",
+    "pyyaml",
+    "tqdm",
+    "jaxtyping>=0.3.5",
+]
+
+[project.optional-dependencies]
+model-eval = [
+    "vllm>=0.8",
+]
+modal = [
+    "modal>=1.3.0",
+]
+plotting = [
+    "matplotlib>=3.10.8",
+]
+all = [
+    "my-project[model-eval,modal,plotting]",
+]
+dev = [
+    "my-project[all]",
+    "jupyter>=1.1.1",
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "pep621"
+tag_format = "v$version"
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
+bump_message = "bump: version $current_version → $new_version"
+major_version_zero = true
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+explicit = true
+
+[tool.uv.sources]
+nvidia-cublas = { index = "nvidia" }
+nvidia-cuda-cccl = { index = "nvidia" }
+nvidia-cuda-cupti = { index = "nvidia" }
+nvidia-cuda-nvrtc = { index = "nvidia" }
+nvidia-cuda-runtime = { index = "nvidia" }
+nvidia-cudnn-cu13 = { index = "nvidia" }
+nvidia-cufft = { index = "nvidia" }
+nvidia-curand = { index = "nvidia" }
+nvidia-cusolver = { index = "nvidia" }
+nvidia-cusparse = { index = "nvidia" }
+nvidia-cusparselt-cu13 = { index = "nvidia" }
+nvidia-nccl-cu13 = { index = "nvidia" }
+nvidia-nvjitlink = { index = "nvidia" }
+nvidia-nvshmem-cu13 = { index = "nvidia" }
+nvidia-nvtx = { index = "nvidia" }
