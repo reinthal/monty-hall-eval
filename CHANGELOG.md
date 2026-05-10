@@ -1,3 +1,10 @@
+## v0.2.0 (2026-05-10)
+
+### Feat
+
+- add generalized monty
+- add monty hall problem
+
 ## v0.2.1 (2026-05-10)
 
 ### Fix
