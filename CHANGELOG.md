@@ -1,3 +1,9 @@
+## v0.5.1 (2026-05-10)
+
+### Fix
+
+- remove LaTeX steps from CI workflow
+
 ## v0.5.0 (2026-05-10)
 
 ### Feat
