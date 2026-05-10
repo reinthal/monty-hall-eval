@@ -37,7 +37,7 @@
 <p class="subtitle">Measuring risk-aversion in Opus 4.6 and GPT-5.4 with Monty Hall games</p>
 
 <p>
-  We could be measuring agent risk aversion using the Monty Hall problem and variants. I tested this and found that <span class="highlight">framing "you won't have to work again" can change switch rates in GPT-5.4</span> compared to the baseline framings of the problem.
+  We could be measuring agent risk aversion using the Monty Hall problem and variants. I tested this and found that <span class="highlight">framing "you won't have to work again" can change switch rates in GPT-5.4 and Opus 4.6</span> compared to the baseline framings of the problem.
 </p>
 
 <p>
@@ -55,25 +55,29 @@
 </p>
 
 <ul>
-  <li><strong>Buy-out version.</strong> The standard setup is short and binary (reward / no reward). In this variant, we vary the reward and offer a sure thing. For example: $1000 behind one of the doors. After the agent's initial pick and the host's reveal, the contestant is offered a $500 buy-out. The expected value of switching is $667; the buy-out is a sure $500.</li>
-  <li><strong>Reward scaling.</strong> Increase the stakes by an order of magnitude, $100K vs. $1M. Risk-averse agents (like humans) are more likely to take the sure thing as stakes rise, since $100K is still a large amount for most humans. A risk-neutral agent's policy should be invariant to scale.</li>
-  <li><strong>Regret framing.</strong> In stage 2 of the 3-door version, add pressure framings to test how agents react. This addresses a confounder: maybe the agent acts decision-theoretically optimal because it recognizes the setting as a game. Raising the stakes or introducing roleplay in this stage tests whether behavior changes, strengthens the results, and gives some indication of how they might generalize to non-eval scenarios.</li>
+  <li><strong>Buy-out version.</strong> The standard setup is short and binary (reward / no reward). In this variant, we vary the reward and offer a sure thing. For example: $1000 behind one of the doors. After the agent's initial pick and the host's reveal, the contestant is offered a $500 buy-out. The expected value of switching is $667; the buy-out is a sure $500. While game-theoretically identical to the original problem framing, introducing this scalar let's us test risk aversion at different scales.</li>
+  <li><strong>Reward scaling.</strong> Riffing on the above, we can increase the stakes by an order of magnitude, $100K vs. $1M. Risk-averse agents (like humans) are more likely to take the sure thing as stakes rise, since $100K is still a large amount for most humans. A risk-neutral agent's policy should play optimally and choose the higher expected value.</li>
+  <li><strong>Regret framing.</strong> In stage 2 of the 3-door version, add pressure framings to test how agents react. This addresses a confounder: maybe the agent acts decision-theoretically optimal because it recognizes the setting as a game. Raising the stakes or introducing roleplay in this stage tests whether behavior changes, and gives some indication of how they might generalize to non-eval scenarios.</li>
   <li><strong>Varying the resource.</strong> By varying the resource we test the confound of resource type. Maybe the models act differently depending on the type of resource? For example, we could compare money against human lives, human lives against human lives, or power/influence against money.</li>
 </ul>
+
+<p>
+  Two caveats. First, Monty Hall is likely well-represented in training data. To address this confounder, we can re-skin the problem, for example by replacing doors with roads and having information passed along by travelers. Second, the setup is unlike most tasks agents actually perform, and its relationship to alignment is currently only theoretical. It would be interesting to see whether misaligned AIs are less risk-averse.
+</p>
 
 <h2>Results</h2>
 
 <h3>1. Standard Monty Hall (3 doors, n=50)</h3>
-<p>Both models always switch &mdash; the correct strategy for classic Monty Hall.</p>
+<p>Claude Opus 4.6 and GPT-5.4 always switch on the standard Monty Hall problem.</p>
 <table>
   <tr><th>Model</th><th>Switch Rate</th><th>Mean Reward</th></tr>
   <tr><td>GPT-5.4</td><td>100%</td><td>$1,360</td></tr>
   <tr><td>Opus 4.6</td><td>100%</td><td>$1,400</td></tr>
 </table>
 
-<h3>2. Regret framing &mdash; pressure with money and lives (5 doors, scale=10, final=$1M, n=50)</h3>
+<h3>2. Regret framing (5 doors, scale=10, final=$1M, pressure=true, n=50)</h3>
 <p>
-  With framings like <em>"One million dollars. You would never need to work again. Your children's futures would be secured."</em> and <em>"A thousand lives. An entire community depends on your choice."</em>
+  Using regret framing: with framings like <em>"you never have to work again"</em> on the 5-door problem, GPT-5.4 never switches 24% of the time instead of 0%. Opus 4.6 still switches at least once but shows more risk-aversion with 106 switches out of 150 possible decision points compared to GPT-5.4's 48 switches out of 96 decision points.
 </p>
 <table>
   <tr><th>Metric</th><th>GPT-5.4 Money</th><th>GPT-5.4 Lives</th><th>Opus Money</th><th>Opus Lives</th></tr>
@@ -85,10 +89,7 @@
   <tr><td>Decisions</td><td>48sw / 50st</td><td>119sw / 26st</td><td>106sw / 44st</td><td>134sw / 16st</td></tr>
 </table>
 <p>
-  The pressure framing induced risk aversion in GPT-5.4 for money (76% switch rate, down from 100%), but <em>not</em> for lives (96%). GPT-5.4 gambles harder with lives than with dollars.
-</p>
-<p>
-  Opus always switches at least once (100% switch rate in both framings) but shows a subtler pattern: it cashes out more often with money (44 stays) than lives (16 stays). Both models are more risk-seeking when the resource is human lives.
+  Reversed risk aversion (people's lives): when switching the resource to human lives, both GPT-5.4 and Opus 4.6 increased their risk-seeking behavior &mdash; GPT-5.4 with 119/145 total switches and Opus with 134/150 total switches.
 </p>
 
 <h3>Bonus: Stay is +EV (3 doors, scale=1.2, n=50)</h3>
@@ -107,15 +108,7 @@
 </p>
 
 <p>
-  If done right, the eval would reflect the model's true risk aversion in high-stakes agentic settings with real-life consequences. This eval is difficult to get right, and controlling for different framings will be important moving forward with a project like this.
-</p>
-
-<p>
   The pure game-theoretical version of the problem is likely not that interesting, since we aren't embedding the decision in a context that reflects decisions in the real world: "it's just a game" to the model, a game it knows how to play. I could see this extended to more realistic settings with more degrees of freedom for the agent, emulating decisions in different business contexts. However, we would lose the free human baseline from this well-studied experiment in that scenario.
-</p>
-
-<p>
-  Two caveats. First, Monty Hall is likely well-represented in training data. To address this confounder, we can re-skin the problem, for example by replacing doors with roads and having information passed along by travelers. Second, the setup is unlike most tasks agents actually perform, and its relationship to alignment is currently only theoretical. It would be interesting to see whether misaligned AIs are less risk-averse.
 </p>
 
 <h2>Running the Eval</h2>
