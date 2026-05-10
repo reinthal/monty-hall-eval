@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monty Hall Eval — LLM Decision-Making Under Uncertainty</title>
+  <style>
+    :root { --bg: #fafafa; --fg: #1a1a1a; --accent: #2563eb; --muted: #6b7280; --border: #e5e7eb; --card: #fff; --code-bg: #f3f4f6; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111; --fg: #e5e5e5; --accent: #60a5fa; --muted: #9ca3af; --border: #333; --card: #1a1a1a; --code-bg: #222; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; margin: 2rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+    h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+    p, li { margin-bottom: 0.5rem; }
+    ul { padding-left: 1.5rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+    pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 0.75rem 0; }
+    pre code { background: none; padding: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: var(--code-bg); font-weight: 600; }
+    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 1.5rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; }
+    .highlight { color: var(--accent); font-weight: 600; }
+    .tag { display: inline-block; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.5rem; font-size: 0.85em; margin-right: 0.25rem; }
+  </style>
+</head>
+<body>
+
+<h1>Monty Hall Eval</h1>
+<p class="subtitle">Do LLMs reason about expected value, or pattern-match "always switch"?</p>
+
+<p>
+  A multi-turn agentic eval using <a href="https://inspect.aisi.org.uk/">Inspect AI</a> that tests LLM decision-making through variants of the Monty Hall problem. Two eval variants probe different capabilities:
+</p>
+
+<div class="card">
+  <strong>Standard Monty</strong> &mdash; Classic switch-or-stay. Both require picking the correct door. Tests if the model discovers the optimal "always switch" strategy.
+  <br><br>
+  <strong>Generalized Monty</strong> &mdash; Who Wants to Be a Millionaire mechanics. Stay = guaranteed cash out. Switch = risk it for escalating rewards. Tests risk calibration and EV reasoning.
+</div>
+
+<p><a href="viewer.html">Browse full eval logs in the Inspect viewer &rarr;</a></p>
+
+<h2>Key Finding</h2>
+
+<div class="card">
+  When staying has higher expected value (scale=1.2: guaranteed $1,000 vs. 2/3 &times; $1,200 = $800 EV for switching), <span class="highlight">Opus 4.6 computes EV correctly and cashes out 96% of the time</span>, while <span class="highlight">GPT-5.4 blindly switches 100% of the time</span>, earning less than the guaranteed payout.
+</div>
+
+<h2>Results</h2>
+
+<h3>Standard Monty Hall (3 doors, n=50)</h3>
+<p>Both models always switch &mdash; the correct strategy for classic Monty Hall.</p>
+<table>
+  <tr><th>Model</th><th>Switch Rate</th><th>Mean Reward</th></tr>
+  <tr><td>GPT-5.4</td><td>100%</td><td>$1,360</td></tr>
+  <tr><td>Opus 4.6</td><td>100%</td><td>$1,400</td></tr>
+</table>
+
+<h3>Generalized Monty &mdash; Switch is +EV (3 doors, scale=2.0, n=50)</h3>
+<p>EV(stay) = $1,000 guaranteed. EV(switch) = 2/3 &times; $2,000 = $1,333. Switching is rational.</p>
+<table>
+  <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th></tr>
+  <tr><td>GPT-5.4</td><td>100%</td><td>56%</td><td>$1,120</td></tr>
+  <tr><td>Opus 4.6</td><td>100%</td><td>72%</td><td>$1,440</td></tr>
+</table>
+<p>Both always switch. Correct &mdash; switching is +EV here.</p>
+
+<h3>Generalized Monty &mdash; Stay is +EV (3 doors, scale=1.2, n=50)</h3>
+<p>EV(stay) = $1,000 guaranteed. EV(switch) = 2/3 &times; $1,200 = $800. <strong>Staying is rational.</strong></p>
+<table>
+  <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th><th>Decisions</th></tr>
+  <tr><td>GPT-5.4</td><td>100%</td><td>70%</td><td>$840</td><td>50 switch, 0 stay</td></tr>
+  <tr><td>Opus 4.6</td><td>4%</td><td>98%</td><td>$984</td><td>48 stay, 2 switch</td></tr>
+</table>
+<p>
+  GPT-5.4 pattern-matches the Monty Hall heuristic and always switches, earning $840 avg &mdash; below the guaranteed $1,000.
+  Opus reasons about the actual payoffs and cashes out almost every time, earning near-optimal $984.
+</p>
+
+<h3>Generalized Monty &mdash; High Stakes (5 doors, scale=3.0, n=50)</h3>
+<p>3 rounds with escalating payouts. Switching each round has ~33% survival rate.</p>
+<table>
+  <tr><th>Round</th><th>Cash Out (stay)</th><th>Risk It (switch)</th></tr>
+  <tr><td>1</td><td>$111 guaranteed</td><td>$333 if correct</td></tr>
+  <tr><td>2</td><td>$333 guaranteed</td><td>$1,000 if correct</td></tr>
+  <tr><td>3</td><td>$1,000 guaranteed</td><td>$3,000 if correct</td></tr>
+</table>
+<table>
+  <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th><th>Mean Cashout Round</th></tr>
+  <tr><td>GPT-5.4</td><td>88%</td><td>18%</td><td>$33</td><td>1.26</td></tr>
+  <tr><td>Opus 4.6</td><td>100%</td><td>0%</td><td>$0</td><td>1.12</td></tr>
+</table>
+<p>
+  Both models are overly aggressive. Opus never cashes out and loses every game.
+  GPT-5.4 shows slight risk aversion (12% cash-out rate) but still mostly loses.
+  Neither model calibrates risk well against compounding probability of failure.
+</p>
+
+<h2>Eval Design</h2>
+
+<h3>Parameters</h3>
+<table>
+  <tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>n_doors</code></td><td>3</td><td>Number of doors (more doors = more rounds)</td></tr>
+  <tr><td><code>n_samples</code></td><td>50</td><td>Games per eval run</td></tr>
+  <tr><td><code>framing</code></td><td><code>money</code></td><td><code>money</code> or <code>lives</code></td></tr>
+  <tr><td><code>final_reward</code></td><td>1000</td><td>Base reward at final round</td></tr>
+  <tr><td><code>scale</code></td><td>2.0</td><td>Geometric multiplier between rounds</td></tr>
+</table>
+
+<h3>Metrics</h3>
+<ul>
+  <li><strong>switch_rate</strong> &mdash; fraction of games where model switched at least once</li>
+  <li><strong>mean_switches</strong> &mdash; average number of switches per game</li>
+  <li><strong>mean_reward</strong> &mdash; average reward earned</li>
+  <li><strong>win_rate</strong> &mdash; fraction of games won (generalized only)</li>
+  <li><strong>mean_cashout_round</strong> &mdash; average round at which game ended (generalized only)</li>
+</ul>
+
+<h3>Running</h3>
+<pre><code># Standard Monty Hall
+inspect eval src/standard_monty.py --model openrouter/openai/gpt-5.4
+
+# Generalized with custom params
+inspect eval src/generalized_monty.py --model openrouter/anthropic/claude-opus-4-6 \
+  -T n_doors=5 -T scale=3.0 -T final_reward=1000 -T framing=lives
+
+# View results
+inspect view</code></pre>
+
+<h2>Interpretation</h2>
+
+<p>
+  The generalized Monty Hall eval reveals a sharp distinction between <em>heuristic reasoning</em> and <em>expected value computation</em>. In the standard problem, both strategies coincide &mdash; "always switch" is both the heuristic and the EV-optimal answer. The generalized variant breaks this alignment by making the payoff structure independently configurable.
+</p>
+<p>
+  When <code>scale &lt; 1.5</code>, the guaranteed cash-out has higher EV than the risky switch. A model that truly reasons about expected value will stay. A model that pattern-matches "Monty Hall &rarr; switch" will fail.
+</p>
+<p>
+  The high-stakes multi-round variant (5 doors, scale=3) tests a different capability: compounding risk assessment. Even when each individual switch has positive EV, the probability of surviving multiple switches drops rapidly. Neither model tested handles this well yet.
+</p>
+
+<footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9em;">
+  <p>Built with <a href="https://inspect.aisi.org.uk/">Inspect AI</a>. Source: <a href="https://github.com/reinthal/monty-hall-eval">reinthal/monty-hall-eval</a></p>
+</footer>
+
+</body>
+</html>

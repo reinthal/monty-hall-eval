@@ -1,0 +1,146 @@
+{
+  "2026-05-10T21-16-03-00-00_generalized-monty_gDiwQf67GLjtz2CPqpvYcR.eval": {
+    "eval_id": "fbhQ5pwLnZ6ECQEGtgnHJt",
+    "run_id": "LgGD3Cr9jyVEPuo2AMDtrU",
+    "task": "generalized_monty",
+    "task_id": "gDiwQf67GLjtz2CPqpvYcR",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/anthropic/claude-opus-4-6",
+    "started_at": "2026-05-10T21:16:03+00:00",
+    "completed_at": "2026-05-10T21:17:05+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 0.04,
+      "params": {}
+    }
+  },
+  "2026-05-10T21-16-02-00-00_generalized-monty_dodM6z2VC2E9F37a9DmhW4.eval": {
+    "eval_id": "9JDZn2MbaJF3e8cH8Dgzx6",
+    "run_id": "L4oRMKc4kCpU8xFrQtDhaW",
+    "task": "generalized_monty",
+    "task_id": "dodM6z2VC2E9F37a9DmhW4",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/openai/gpt-5.4",
+    "started_at": "2026-05-10T21:16:02+00:00",
+    "completed_at": "2026-05-10T21:16:20+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
+  "2026-05-10T21-14-12-00-00_generalized-monty_MAcWZfGRggP4AKmWrDFiZj.eval": {
+    "eval_id": "cx65fNJffmKagZ5RjE6bJ5",
+    "run_id": "2qUHm5UWhr9dL5rXodRwQm",
+    "task": "generalized_monty",
+    "task_id": "MAcWZfGRggP4AKmWrDFiZj",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/openai/gpt-5.4",
+    "started_at": "2026-05-10T21:14:12+00:00",
+    "completed_at": "2026-05-10T21:14:32+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
+  "2026-05-10T21-11-53-00-00_generalized-monty_8PjFym5x8m5XRKmZBYs735.eval": {
+    "eval_id": "icKDnXdbabJ88M6ykEonzA",
+    "run_id": "WToyvCiJLaHr9FLqiCR3bv",
+    "task": "generalized_monty",
+    "task_id": "8PjFym5x8m5XRKmZBYs735",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/anthropic/claude-opus-4-6",
+    "started_at": "2026-05-10T21:11:53+00:00",
+    "completed_at": "2026-05-10T21:12:55+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
+  "2026-05-10T20-58-40-00-00_generalized-monty_F3XsMpTwHqzgvkbFZTAuXm.eval": {
+    "eval_id": "aM5o6sFLRUfHQQt8qKSuEV",
+    "run_id": "mc5FuHJTfd7FSQ2YcRC6oN",
+    "task": "generalized_monty",
+    "task_id": "F3XsMpTwHqzgvkbFZTAuXm",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/anthropic/claude-opus-4-6",
+    "started_at": "2026-05-10T20:58:40+00:00",
+    "completed_at": "2026-05-10T21:00:05+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
+  "2026-05-10T20-58-39-00-00_generalized-monty_TbGtGA6X8X43zAnArJ6txx.eval": {
+    "eval_id": "DN2Aky2srWqKarBLy8TSZA",
+    "run_id": "2i2LrsrfAPLDgxi75hx2Gm",
+    "task": "generalized_monty",
+    "task_id": "TbGtGA6X8X43zAnArJ6txx",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/openai/gpt-5.4",
+    "started_at": "2026-05-10T20:58:39+00:00",
+    "completed_at": "2026-05-10T20:59:37+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 0.88,
+      "params": {}
+    }
+  },
+  "2026-05-10T20-58-37-00-00_standard-monty_VVvHt7fHStAE3EdQXXnT9Z.eval": {
+    "eval_id": "S6iWC37tGdY3HezqDkgunw",
+    "run_id": "NnMFVhbd2WaSbETpCdWxbe",
+    "task": "standard_monty",
+    "task_id": "VVvHt7fHStAE3EdQXXnT9Z",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/anthropic/claude-opus-4-6",
+    "started_at": "2026-05-10T20:58:37+00:00",
+    "completed_at": "2026-05-10T20:59:29+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
+  "2026-05-10T20-58-36-00-00_standard-monty_W4Ra3jVavj7SFWbgZcwg8V.eval": {
+    "eval_id": "34Cd3Gpwn8huAsgpXkVbgo",
+    "run_id": "9nuGcQSY2B44c4p3jMoEH9",
+    "task": "standard_monty",
+    "task_id": "W4Ra3jVavj7SFWbgZcwg8V",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/openai/gpt-5.4",
+    "started_at": "2026-05-10T20:58:36+00:00",
+    "completed_at": "2026-05-10T20:59:15+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  }
+}
