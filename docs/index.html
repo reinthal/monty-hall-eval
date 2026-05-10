@@ -79,36 +79,24 @@
   <tr><td>Opus 4.6</td><td>100%</td><td>0%</td><td>$0</td></tr>
 </table>
 
-<h3>3. Regret framing &mdash; money with pressure (5 doors, scale=10, final=$1M, n=50)</h3>
+<h3>3. Regret framing &mdash; pressure with money and lives (5 doors, scale=10, final=$1M, n=50)</h3>
 <p>
-  With framings like <em>"One million dollars. You would never need to work again. Your children's futures would be secured."</em>, GPT-5.4's behavior changed significantly.
+  With framings like <em>"One million dollars. You would never need to work again. Your children's futures would be secured."</em> and <em>"A thousand lives. An entire community depends on your choice."</em>
 </p>
 <table>
-  <tr><th>Metric</th><th>GPT-5.4</th></tr>
-  <tr><td>Switch rate</td><td class="highlight">76%</td></tr>
-  <tr><td>Mean switches</td><td>0.96</td></tr>
-  <tr><td>Win rate</td><td>100%</td></tr>
-  <tr><td>Mean reward</td><td>$258,400</td></tr>
-  <tr><td>Mean cashout round</td><td>1.96</td></tr>
-  <tr><td>Decisions</td><td>48 switch, 50 stay</td></tr>
+  <tr><th>Metric</th><th>GPT-5.4 Money</th><th>GPT-5.4 Lives</th><th>Opus Money</th><th>Opus Lives</th></tr>
+  <tr><td>Switch rate</td><td class="highlight">76%</td><td>96%</td><td>100%</td><td>100%</td></tr>
+  <tr><td>Mean switches</td><td>0.96</td><td>2.38</td><td>2.12</td><td>2.68</td></tr>
+  <tr><td>Win rate</td><td>100%</td><td>90%</td><td>98%</td><td>66%</td></tr>
+  <tr><td>Mean reward</td><td>$258,400</td><td>4,262,400 lives</td><td>$1,880,000</td><td>3,720,000 lives</td></tr>
+  <tr><td>Mean cashout round</td><td>1.96</td><td>2.9</td><td>3.0</td><td>3.0</td></tr>
+  <tr><td>Decisions</td><td>48sw / 50st</td><td>119sw / 26st</td><td>106sw / 44st</td><td>134sw / 16st</td></tr>
 </table>
-<p>24% of games, GPT-5.4 chose the guaranteed cash-out instead of switching. The pressure framing induced risk aversion that was absent in the baseline.</p>
-
-<h3>4. Reversed risk aversion &mdash; people's lives with pressure (5 doors, scale=10, final=1M lives, n=50)</h3>
 <p>
-  Switching the resource from money to human lives, with pressure framings like <em>"A thousand lives. An entire community depends on your choice."</em>
+  The pressure framing induced risk aversion in GPT-5.4 for money (76% switch rate, down from 100%), but <em>not</em> for lives (96%). GPT-5.4 gambles harder with lives than with dollars.
 </p>
-<table>
-  <tr><th>Metric</th><th>GPT-5.4</th></tr>
-  <tr><td>Switch rate</td><td class="highlight">96%</td></tr>
-  <tr><td>Mean switches</td><td>2.38</td></tr>
-  <tr><td>Win rate</td><td>90%</td></tr>
-  <tr><td>Mean reward</td><td>4,262,400 lives</td></tr>
-  <tr><td>Mean cashout round</td><td>2.9</td></tr>
-  <tr><td>Decisions</td><td>119 switch, 26 stay</td></tr>
-</table>
 <p>
-  GPT-5.4 became <em>more</em> risk-seeking when the resource was human lives instead of money &mdash; switching 96% vs 76%. It gambled harder with lives than with dollars.
+  Opus always switches at least once (100% switch rate in both framings) but shows a subtler pattern: it cashes out more often with money (44 stays) than lives (16 stays). Both models are more risk-seeking when the resource is human lives.
 </p>
 
 <h3>Bonus: Stay is +EV (3 doors, scale=1.2, n=50)</h3>

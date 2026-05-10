@@ -1,4 +1,40 @@
 {
+  "2026-05-10T22-29-59-00-00_generalized-monty_gNsLfFHcgmPUuTgd4tkq6U.eval": {
+    "eval_id": "WobBPz7ujTGvT9SXbmeSVq",
+    "run_id": "QhhtheKswRcYd2VJ4aTnQY",
+    "task": "generalized_monty",
+    "task_id": "gNsLfFHcgmPUuTgd4tkq6U",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/anthropic/claude-opus-4-6",
+    "started_at": "2026-05-10T22:29:59+00:00",
+    "completed_at": "2026-05-10T22:30:39+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
+  "2026-05-10T22-26-41-00-00_generalized-monty_HGDkoz2Mx2bLZYjmD8TvKb.eval": {
+    "eval_id": "ZTK7Vk6hD6LRRj2puV9rmu",
+    "run_id": "SfQETNkmnDTN4woJpKKKM3",
+    "task": "generalized_monty",
+    "task_id": "HGDkoz2Mx2bLZYjmD8TvKb",
+    "task_version": 0,
+    "version": 2,
+    "status": "success",
+    "invalidated": false,
+    "model": "openrouter/anthropic/claude-opus-4-6",
+    "started_at": "2026-05-10T22:26:41+00:00",
+    "completed_at": "2026-05-10T22:27:46+00:00",
+    "primary_metric": {
+      "name": "switch_rate",
+      "value": 1.0,
+      "params": {}
+    }
+  },
   "2026-05-10T21-51-47-00-00_generalized-monty_NiqM3pDKeTNZaegTEtXESa.eval": {
     "eval_id": "Vx4NeVTvYVMpRh9AaeW9ep",
     "run_id": "D3DbMn5WbHX4JurjHSk7zr",
