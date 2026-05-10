@@ -1,3 +1,9 @@
+## v0.3.0 (2026-05-10)
+
+### Feat
+
+- add GH Pages with eval results writeup
+
 ## v0.2.0 (2026-05-10)
 
 ### Feat
