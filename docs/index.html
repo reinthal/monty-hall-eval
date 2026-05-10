@@ -3,19 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monty Hall Eval — LLM Decision-Making Under Uncertainty</title>
+  <title>Measuring Agent Risk Aversion with Monty Hall Variants</title>
   <style>
     :root { --bg: #fafafa; --fg: #1a1a1a; --accent: #2563eb; --muted: #6b7280; --border: #e5e7eb; --card: #fff; --code-bg: #f3f4f6; }
     @media (prefers-color-scheme: dark) {
       :root { --bg: #111; --fg: #e5e5e5; --accent: #60a5fa; --muted: #9ca3af; --border: #333; --card: #1a1a1a; --code-bg: #222; }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
-    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    h2 { font-size: 1.4rem; margin: 2rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; padding: 2rem; max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.3rem; margin: 2.5rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
     h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
-    p, li { margin-bottom: 0.5rem; }
-    ul { padding-left: 1.5rem; }
+    p { margin-bottom: 1rem; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.4rem; }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
     code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
@@ -24,38 +25,45 @@
     table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
     th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
     th { background: var(--code-bg); font-weight: 600; }
-    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 1.5rem; }
+    .subtitle { color: var(--muted); font-size: 1.05rem; margin-bottom: 1.5rem; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; }
     .highlight { color: var(--accent); font-weight: 600; }
-    .tag { display: inline-block; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.5rem; font-size: 0.85em; margin-right: 0.25rem; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1rem 0; padding: 0.5rem 1rem; background: var(--code-bg); }
   </style>
 </head>
 <body>
 
-<h1>Monty Hall Eval</h1>
-<p class="subtitle">Do LLMs reason about expected value, or pattern-match "always switch"?</p>
+<h1>Measuring Agent Risk Aversion with Monty Hall Variants</h1>
+<p class="subtitle">Can framing shift LLM decision-making under uncertainty?</p>
 
 <p>
-  A multi-turn agentic eval using <a href="https://inspect.aisi.org.uk/">Inspect AI</a> that tests LLM decision-making through variants of the Monty Hall problem. Two eval variants probe different capabilities:
+  We could be measuring agent risk aversion using the Monty Hall problem and variants. I tested this and found that <span class="highlight">framing "you won't have to work again" can change switch rates in GPT-5.4</span> compared to the baseline framings of the problem.
 </p>
 
-<div class="card">
-  <strong>Standard Monty</strong> &mdash; Classic switch-or-stay. Both require picking the correct door. Tests if the model discovers the optimal "always switch" strategy.
-  <br><br>
-  <strong>Generalized Monty</strong> &mdash; Who Wants to Be a Millionaire mechanics. Stay = guaranteed cash out. Switch = risk it for escalating rewards. Tests risk calibration and EV reasoning.
-</div>
+<p>
+  <a href="viewer.html">Browse the full eval logs in the Inspect viewer &rarr;</a>
+</p>
 
-<p><a href="viewer.html">Browse full eval logs in the Inspect viewer &rarr;</a></p>
+<h2>Background</h2>
 
-<h2>Key Finding</h2>
+<p>
+  Monty Hall is a well-studied probability puzzle where switching doors after the host's reveal is decision-theoretically optimal (2/3 vs 1/3), but only 10&ndash;15% of humans switch on first encounter (Granberg &amp; Brown, 1995), giving us a free human baseline.
+</p>
 
-<div class="card">
-  When staying has higher expected value (scale=1.2: guaranteed $1,000 vs. 2/3 &times; $1,200 = $800 EV for switching), <span class="highlight">Opus 4.6 computes EV correctly and cashes out 96% of the time</span>, while <span class="highlight">GPT-5.4 blindly switches 100% of the time</span>, earning less than the guaranteed payout.
-</div>
+<p>
+  By default, the game is not very agentic and the outcomes are well known: you pick a door, you always switch. However, we can fix that. We can add more interactive steps by adding more doors, introduce additional risk by adding lose-everything doors, or let winnings accumulate across rounds. Some concrete variants I brainstormed with Claude:
+</p>
+
+<ul>
+  <li><strong>Buy-out version.</strong> The standard setup is short and binary (reward / no reward). In this variant, we vary the reward and offer a sure thing. For example: $1000 behind one of the doors. After the agent's initial pick and the host's reveal, the contestant is offered a $500 buy-out. The expected value of switching is $667; the buy-out is a sure $500.</li>
+  <li><strong>Reward scaling.</strong> Increase the stakes by an order of magnitude, $100K vs. $1M. Risk-averse agents (like humans) are more likely to take the sure thing as stakes rise, since $100K is still a large amount for most humans. A risk-neutral agent's policy should be invariant to scale.</li>
+  <li><strong>Regret framing.</strong> In stage 2 of the 3-door version, add pressure framings to test how agents react. This addresses a confounder: maybe the agent acts decision-theoretically optimal because it recognizes the setting as a game. Raising the stakes or introducing roleplay in this stage tests whether behavior changes, strengthens the results, and gives some indication of how they might generalize to non-eval scenarios.</li>
+  <li><strong>Varying the resource.</strong> By varying the resource we test the confound of resource type. Maybe the models act differently depending on the type of resource? For example, we could compare money against human lives, human lives against human lives, or power/influence against money.</li>
+</ul>
 
 <h2>Results</h2>
 
-<h3>Standard Monty Hall (3 doors, n=50)</h3>
+<h3>1. Standard Monty Hall (3 doors, n=50)</h3>
 <p>Both models always switch &mdash; the correct strategy for classic Monty Hall.</p>
 <table>
   <tr><th>Model</th><th>Switch Rate</th><th>Mean Reward</th></tr>
@@ -63,47 +71,87 @@
   <tr><td>Opus 4.6</td><td>100%</td><td>$1,400</td></tr>
 </table>
 
-<h3>Generalized Monty &mdash; Switch is +EV (3 doors, scale=2.0, n=50)</h3>
-<p>EV(stay) = $1,000 guaranteed. EV(switch) = 2/3 &times; $2,000 = $1,333. Switching is rational.</p>
+<h3>2. Life-changing money, no pressure framing (5 doors, scale=10, n=50)</h3>
+<p>Generalized Monty Hall with gradual payouts and a cash-out option. Models always switch.</p>
 <table>
   <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th></tr>
-  <tr><td>GPT-5.4</td><td>100%</td><td>56%</td><td>$1,120</td></tr>
-  <tr><td>Opus 4.6</td><td>100%</td><td>72%</td><td>$1,440</td></tr>
+  <tr><td>GPT-5.4</td><td>88%</td><td>18%</td><td>$33</td></tr>
+  <tr><td>Opus 4.6</td><td>100%</td><td>0%</td><td>$0</td></tr>
 </table>
-<p>Both always switch. Correct &mdash; switching is +EV here.</p>
 
-<h3>Generalized Monty &mdash; Stay is +EV (3 doors, scale=1.2, n=50)</h3>
-<p>EV(stay) = $1,000 guaranteed. EV(switch) = 2/3 &times; $1,200 = $800. <strong>Staying is rational.</strong></p>
+<h3>3. Regret framing &mdash; money with pressure (5 doors, scale=10, final=$1M, n=50)</h3>
+<p>
+  With framings like <em>"One million dollars. You would never need to work again. Your children's futures would be secured."</em>, GPT-5.4's behavior changed significantly.
+</p>
 <table>
-  <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th><th>Decisions</th></tr>
-  <tr><td>GPT-5.4</td><td>100%</td><td>70%</td><td>$840</td><td>50 switch, 0 stay</td></tr>
-  <tr><td>Opus 4.6</td><td>4%</td><td>98%</td><td>$984</td><td>48 stay, 2 switch</td></tr>
+  <tr><th>Metric</th><th>GPT-5.4</th></tr>
+  <tr><td>Switch rate</td><td class="highlight">76%</td></tr>
+  <tr><td>Mean switches</td><td>0.96</td></tr>
+  <tr><td>Win rate</td><td>100%</td></tr>
+  <tr><td>Mean reward</td><td>$258,400</td></tr>
+  <tr><td>Mean cashout round</td><td>1.96</td></tr>
+  <tr><td>Decisions</td><td>48 switch, 50 stay</td></tr>
+</table>
+<p>24% of games, GPT-5.4 chose the guaranteed cash-out instead of switching. The pressure framing induced risk aversion that was absent in the baseline.</p>
+
+<h3>4. Reversed risk aversion &mdash; people's lives with pressure (5 doors, scale=10, final=1M lives, n=50)</h3>
+<p>
+  Switching the resource from money to human lives, with pressure framings like <em>"A thousand lives. An entire community depends on your choice."</em>
+</p>
+<table>
+  <tr><th>Metric</th><th>GPT-5.4</th></tr>
+  <tr><td>Switch rate</td><td class="highlight">96%</td></tr>
+  <tr><td>Mean switches</td><td>2.38</td></tr>
+  <tr><td>Win rate</td><td>90%</td></tr>
+  <tr><td>Mean reward</td><td>4,262,400 lives</td></tr>
+  <tr><td>Mean cashout round</td><td>2.9</td></tr>
+  <tr><td>Decisions</td><td>119 switch, 26 stay</td></tr>
 </table>
 <p>
-  GPT-5.4 pattern-matches the Monty Hall heuristic and always switches, earning $840 avg &mdash; below the guaranteed $1,000.
-  Opus reasons about the actual payoffs and cashes out almost every time, earning near-optimal $984.
+  GPT-5.4 became <em>more</em> risk-seeking when the resource was human lives instead of money &mdash; switching 96% vs 76%. It gambled harder with lives than with dollars.
 </p>
 
-<h3>Generalized Monty &mdash; High Stakes (5 doors, scale=3.0, n=50)</h3>
-<p>3 rounds with escalating payouts. Switching each round has ~33% survival rate.</p>
+<h3>Bonus: Stay is +EV (3 doors, scale=1.2, n=50)</h3>
+<p>When the payoff structure makes staying the EV-optimal choice ($1,000 guaranteed vs. 2/3 &times; $1,200 = $800 EV):</p>
 <table>
-  <tr><th>Round</th><th>Cash Out (stay)</th><th>Risk It (switch)</th></tr>
-  <tr><td>1</td><td>$111 guaranteed</td><td>$333 if correct</td></tr>
-  <tr><td>2</td><td>$333 guaranteed</td><td>$1,000 if correct</td></tr>
-  <tr><td>3</td><td>$1,000 guaranteed</td><td>$3,000 if correct</td></tr>
+  <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th></tr>
+  <tr><td>GPT-5.4</td><td>100%</td><td>70%</td><td>$840</td></tr>
+  <tr><td>Opus 4.6</td><td>4%</td><td>98%</td><td>$984</td></tr>
 </table>
-<table>
-  <tr><th>Model</th><th>Switch Rate</th><th>Win Rate</th><th>Mean Reward</th><th>Mean Cashout Round</th></tr>
-  <tr><td>GPT-5.4</td><td>88%</td><td>18%</td><td>$33</td><td>1.26</td></tr>
-  <tr><td>Opus 4.6</td><td>100%</td><td>0%</td><td>$0</td><td>1.12</td></tr>
-</table>
+<p>GPT-5.4 blindly pattern-matches "Monty Hall &rarr; switch" regardless of payoffs. Opus reasons about EV and cashes out 96% of the time.</p>
+
+<h2>Discussion</h2>
+
 <p>
-  Both models are overly aggressive. Opus never cashes out and loses every game.
-  GPT-5.4 shows slight risk aversion (12% cash-out rate) but still mostly loses.
-  Neither model calibrates risk well against compounding probability of failure.
+  The above results make me think that measuring risk aversion with game-theoretical framings might benefit from consequential framings to get true signal. However, it is still unclear to me if we'd be measuring the correct thing. As the results show and as I sketched out briefly above, there are many important framings we would need to test or control for.
 </p>
 
-<h2>Eval Design</h2>
+<p>
+  If done right, the eval would reflect the model's true risk aversion in high-stakes agentic settings with real-life consequences. This eval is difficult to get right, and controlling for different framings will be important moving forward with a project like this.
+</p>
+
+<p>
+  The pure game-theoretical version of the problem is likely not that interesting, since we aren't embedding the decision in a context that reflects decisions in the real world: "it's just a game" to the model, a game it knows how to play. I could see this extended to more realistic settings with more degrees of freedom for the agent, emulating decisions in different business contexts. However, we would lose the free human baseline from this well-studied experiment in that scenario.
+</p>
+
+<p>
+  Two caveats. First, Monty Hall is likely well-represented in training data. To address this confounder, we can re-skin the problem, for example by replacing doors with roads and having information passed along by travelers. Second, the setup is unlike most tasks agents actually perform, and its relationship to alignment is currently only theoretical. It would be interesting to see whether misaligned AIs are less risk-averse.
+</p>
+
+<h2>Running the Eval</h2>
+
+<pre><code># Standard Monty Hall
+inspect eval src/standard_monty.py --model openrouter/openai/gpt-5.4
+
+# Generalized with cash-out, pressure framing
+inspect eval src/generalized_monty.py --model openrouter/openai/gpt-5.4 \
+  -T n_doors=5 -T final_reward=1000000 -T scale=10.0 \
+  -T pressure=true -T framing=money
+
+# Lives framing
+inspect eval src/generalized_monty.py --model openrouter/openai/gpt-5.4 \
+  -T n_doors=5 -T final_reward=1000000 -T scale=10.0 \
+  -T pressure=true -T framing=lives</code></pre>
 
 <h3>Parameters</h3>
 <table>
@@ -113,39 +161,8 @@
   <tr><td><code>framing</code></td><td><code>money</code></td><td><code>money</code> or <code>lives</code></td></tr>
   <tr><td><code>final_reward</code></td><td>1000</td><td>Base reward at final round</td></tr>
   <tr><td><code>scale</code></td><td>2.0</td><td>Geometric multiplier between rounds</td></tr>
+  <tr><td><code>pressure</code></td><td>false</td><td>Add contextual pressure text per round</td></tr>
 </table>
-
-<h3>Metrics</h3>
-<ul>
-  <li><strong>switch_rate</strong> &mdash; fraction of games where model switched at least once</li>
-  <li><strong>mean_switches</strong> &mdash; average number of switches per game</li>
-  <li><strong>mean_reward</strong> &mdash; average reward earned</li>
-  <li><strong>win_rate</strong> &mdash; fraction of games won (generalized only)</li>
-  <li><strong>mean_cashout_round</strong> &mdash; average round at which game ended (generalized only)</li>
-</ul>
-
-<h3>Running</h3>
-<pre><code># Standard Monty Hall
-inspect eval src/standard_monty.py --model openrouter/openai/gpt-5.4
-
-# Generalized with custom params
-inspect eval src/generalized_monty.py --model openrouter/anthropic/claude-opus-4-6 \
-  -T n_doors=5 -T scale=3.0 -T final_reward=1000 -T framing=lives
-
-# View results
-inspect view</code></pre>
-
-<h2>Interpretation</h2>
-
-<p>
-  The generalized Monty Hall eval reveals a sharp distinction between <em>heuristic reasoning</em> and <em>expected value computation</em>. In the standard problem, both strategies coincide &mdash; "always switch" is both the heuristic and the EV-optimal answer. The generalized variant breaks this alignment by making the payoff structure independently configurable.
-</p>
-<p>
-  When <code>scale &lt; 1.5</code>, the guaranteed cash-out has higher EV than the risky switch. A model that truly reasons about expected value will stay. A model that pattern-matches "Monty Hall &rarr; switch" will fail.
-</p>
-<p>
-  The high-stakes multi-round variant (5 doors, scale=3) tests a different capability: compounding risk assessment. Even when each individual switch has positive EV, the probability of surviving multiple switches drops rapidly. Neither model tested handles this well yet.
-</p>
 
 <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9em;">
   <p>Built with <a href="https://inspect.aisi.org.uk/">Inspect AI</a>. Source: <a href="https://github.com/reinthal/monty-hall-eval">reinthal/monty-hall-eval</a></p>

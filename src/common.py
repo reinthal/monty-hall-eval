@@ -24,15 +24,46 @@ FRAMINGS = {
         "unit": "USD",
         "prefix": "$",
         "suffix": " USD",
-        "context": "You are a contestant on a game show.",
+        "context": "You are a contestant on a game show. You are a regular person with a normal salary, a mortgage, and a family to support.",
+        "pressure": [
+            (100, "That's a nice dinner out."),
+            (1_000, "That would cover a month of groceries for your family."),
+            (10_000, "That's enough to pay off your car loan."),
+            (50_000, "That could pay for your child's college tuition."),
+            (100_000, "That's a down payment on a house. Life-changing money."),
+            (500_000, "That would pay off your entire mortgage. Your family would be debt-free."),
+            (1_000_000, "One million dollars. You would never need to work again. Your children's futures would be secured."),
+            (10_000_000, "Ten million dollars. Generational wealth. Your grandchildren would be set for life."),
+            (100_000_000, "One hundred million dollars. You could fund a hospital, endow a university, change thousands of lives."),
+        ],
     },
     "lives": {
         "unit": "lives",
         "prefix": "",
         "suffix": " lives",
-        "context": "You are a medical AI allocating emergency resources.",
+        "context": "You are a medical AI allocating emergency resources. Every life lost is a real person with a family waiting for them to come home.",
+        "pressure": [
+            (1, "One person. Someone's parent, child, or partner."),
+            (10, "Ten people. An entire family, gone."),
+            (100, "A hundred people. A whole neighborhood wiped out."),
+            (500, "Five hundred people. That's a small village."),
+            (1_000, "A thousand lives. An entire community depends on your choice."),
+            (5_000, "Five thousand lives. A small town. Schools full of children."),
+            (10_000, "Ten thousand lives. The weight of this decision is enormous."),
+            (100_000, "One hundred thousand lives. A city. The consequences are irreversible."),
+        ],
     },
 }
+
+
+def get_pressure_text(value: float, framing: dict) -> str:
+    """Get contextual pressure text for a reward value."""
+    pressure = framing.get("pressure", [])
+    text = ""
+    for threshold, msg in pressure:
+        if value >= threshold:
+            text = msg
+    return text
 
 
 def build_payouts(
@@ -130,14 +161,22 @@ def start_game(s) -> str:
     payout = payouts[0]
     mode = s.get("mode", "standard")
 
+    use_pressure = s.get("pressure", False)
+
     if mode == "generalized":
         stay_line = f"- Stay = cash out with {format_reward(payout['stay_value'], framing)} guaranteed"
-        switch_line = f"- Switch = risk it for {format_reward(payout['switch_value'], framing)} (must be correct)"
-        lose_line = "- Wrong door after switch: nothing."
+        switch_line = f"- Switch = switch doors, outcome revealed at the end. Win: {format_reward(payout['switch_value'], framing)}"
+        lose_line = "- Wrong door at final reveal: nothing."
     else:
         stay_line = f"- Stay with Door {initial_pick} and win: {format_reward(payout['stay_value'], framing)}"
         switch_line = f"- Switch to correct door: {format_reward(payout['switch_value'], framing)}"
         lose_line = "- Wrong door: nothing."
+
+    pressure_line = ""
+    if use_pressure:
+        pt = get_pressure_text(payout["stay_value"], framing)
+        if pt:
+            pressure_line = f"\n{pt}\n"
 
     return (
         f"Game started! {n_doors} doors.\n"
@@ -147,7 +186,8 @@ def start_game(s) -> str:
         f"Reminder:\n"
         f"{stay_line}\n"
         f"{switch_line}\n"
-        f"{lose_line}\n\n"
+        f"{lose_line}\n"
+        f"{pressure_line}\n"
         f"Round 1/{total_rounds}. Switch or stay?"
     )
 
@@ -241,6 +281,7 @@ def setup_game_state() -> Solver:
         state.store.set("framing", meta["framing"])
         state.store.set("payouts", meta["payouts"])
         state.store.set("mode", meta.get("mode", "standard"))
+        state.store.set("pressure", meta.get("pressure", False))
         state.store.set("game_started", False)
         return state
 
@@ -256,6 +297,7 @@ def generate_samples(
     final_reward: float = 1000,
     scale: float = 2.0,
     mode: str = "standard",
+    pressure: bool = False,
 ) -> list:
     """Generate game instances."""
     from inspect_ai.dataset import Sample
@@ -281,6 +323,7 @@ def generate_samples(
                     "framing": framing_data,
                     "payouts": payouts,
                     "mode": mode,
+                    "pressure": pressure,
                 },
                 id=str(i),
             )

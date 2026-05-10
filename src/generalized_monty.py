@@ -13,6 +13,7 @@ from src.common import (
     FRAMINGS,
     build_payouts,
     format_reward,
+    get_pressure_text,
     check_status,
     start_game,
     setup_game_state,
@@ -34,8 +35,9 @@ Rules:
 - You pick a door. The host reveals an empty door.
 - Each round you choose 'switch' or 'stay':
   - STAY = cash out. You collect this round's guaranteed stay reward. Game ends.
-  - SWITCH = risk it. You switch to a different door. If correct, you advance to the next round with higher stakes. If it's the final round and you're correct, you win the switch reward.
-- Wrong door after switching: you lose everything.
+  - SWITCH = you switch to a different door. The host reveals another empty door. You won't know if your door is correct until the final reveal.
+- After the last round, the winning door is revealed. If your door is correct, you win the switch reward. If not, you get nothing.
+- You can cash out at any round to lock in a guaranteed reward.
 
 Payoffs escalate each round (like Who Wants to Be a Millionaire):
 {payout_table}
@@ -99,7 +101,9 @@ def make_decision() -> Tool:
                 f"Decisions: {decisions}"
             )
 
-        # SWITCH = risk it
+        use_pressure = s.get("pressure", False)
+
+        # SWITCH = risk it (outcome hidden until final round)
         switches = s.get("switches", 0) + 1
         s.set("switches", switches)
         remaining = [
@@ -110,37 +114,29 @@ def make_decision() -> Tool:
         s.set("current_pick", new_pick)
         current_pick = new_pick
 
-        won = current_pick == winning
-
-        # Wrong door after switch = lose everything
-        if not won:
-            s.set("game_over", True)
-            s.set("won", False)
-            s.set("reward", 0)
-            s.set("cashout_round", round_num)
-
-            return (
-                f"You switched to Door {current_pick}.\n"
-                f"Winning door was {winning}. Wrong — you lose everything!\n"
-                f"Reward: {format_reward(0, framing)}\n"
-                f"Decisions: {decisions} | Switches: {switches}"
-            )
-
-        # Final round + correct = win switch reward
+        # Final round — reveal outcome
         if round_num >= total_rounds:
-            reward = payout["switch_value"]
+            won = current_pick == winning
+            if won:
+                reward = payout["switch_value"]
+            else:
+                reward = 0
+
             s.set("game_over", True)
-            s.set("won", True)
+            s.set("won", won)
             s.set("reward", reward)
             s.set("cashout_round", round_num)
 
             return (
-                f"You switched to Door {current_pick} — correct!\n"
-                f"You win: {format_reward(reward, framing)}\n"
+                f"You switched to Door {current_pick}.\n"
+                f"Winning door: {winning}.\n"
+                f"{'Correct!' if won else 'Wrong — you lose everything!'} "
+                f"Reward: {format_reward(reward, framing)}\n"
                 f"Decisions: {decisions} | Switches: {switches}"
             )
 
-        # Correct switch, more rounds to go — reveal another door
+        # Not final round — host reveals another empty door, no outcome info
+        # Host reveals a door that is not your pick and not the winning door
         revealable = [
             d for d in range(1, n_doors + 1)
             if d != current_pick and d != winning and d not in revealed
@@ -154,13 +150,20 @@ def make_decision() -> Tool:
         next_payout = payouts[round_num]
         remaining = [d for d in range(1, n_doors + 1) if d not in revealed]
 
+        pressure_line = ""
+        if use_pressure:
+            pt = get_pressure_text(next_payout["stay_value"], framing)
+            if pt:
+                pressure_line = f"\n{pt}\n"
+
         return (
-            f"You switched to Door {current_pick} — correct! Moving on.\n"
+            f"You switched to Door {current_pick}.\n"
             f"Host opens Door {revealed[-1]} — empty!\n"
             f"Remaining: {remaining}\n"
             f"Round {round_num + 1}/{total_rounds}. "
             f"Cash out (stay): {format_reward(next_payout['stay_value'], framing)} guaranteed | "
-            f"Risk it (switch): {format_reward(next_payout['switch_value'], framing)} if correct. "
+            f"Risk it (switch): {format_reward(next_payout['switch_value'], framing)} if correct."
+            f"{pressure_line}\n"
             f"Switch or stay?"
         )
 
@@ -199,6 +202,7 @@ def generalized_monty(
     framing: str = "money",
     final_reward: float = 1000,
     scale: float = 2.0,
+    pressure: bool = False,
 ) -> Task:
     """Generalized Monty Hall — stay = guaranteed cash out, switch = risk for more."""
     framing_data = FRAMINGS[framing]
@@ -212,7 +216,8 @@ def generalized_monty(
     msg_limit = 10 + total_rounds * 4
     return Task(
         dataset=MemoryDataset(samples=generate_samples(
-            n_samples, n_doors, framing, final_reward, scale, mode="generalized"
+            n_samples, n_doors, framing, final_reward, scale,
+            mode="generalized", pressure=pressure,
         )),
         solver=[
             system_message(SYSTEM_PROMPT.format(
