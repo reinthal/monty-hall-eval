@@ -39,21 +39,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check out release tag
-        uses: actions/checkout@v4
-        with:
-          ref: v${{ env.REVISION }}
-
-      - name: Compile LaTeX
-        uses: xu-cheng/latex-action@v3
-        with:
-          root_file: main.tex
-          working_directory: report
-
-      - name: Upload PDF to release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ env.REVISION }}
-          files: report/main.pdf
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
